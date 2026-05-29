@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="container py-4">
+    <div class="dashboard-heading">
+        <div><h1>Donor Dashboard</h1><p>Manage your profile, eligibility, and nearby emergency requests.</p></div>
+        {% if donor %}<span class="badge rounded-pill text-bg-{{ 'success' if donor.eligibility_status == 'Eligible' else 'warning' }}">{{ donor.eligibility_status }}</span>{% endif %}
+    </div>
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="panel">
+                <h2 class="h5">Donor Profile</h2>
+                <form method="post" action="{{ url_for('donor.save_profile') }}">
+                    <label class="form-label">Blood Group</label>
+                    <select class="form-select mb-3" name="blood_group" required>
+                        {% for group in blood_groups %}<option value="{{ group }}" {% if donor and donor.blood_group == group %}selected{% endif %}>{{ group }}</option>{% endfor %}
+                    </select>
+                    <label class="form-label">City</label>
+                    <input class="form-control mb-3" name="city" value="{{ donor.city if donor else '' }}" required>
+                    <label class="form-label">Phone</label>
+                    <input class="form-control mb-3" name="phone" value="{{ donor.phone if donor else '' }}" required>
+                    <label class="form-label">Last Donation Date</label>
+                    <input class="form-control mb-3" type="date" name="last_donation_date" value="{{ donor.last_donation_date if donor and donor.last_donation_date else '' }}">
+                    <button class="btn btn-danger w-100" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save Profile</button>
+                </form>
+            </div>
+            <div class="panel mt-4">
+                <h2 class="h5">Schedule Donation</h2>
+                <form method="post" action="{{ url_for('donor.schedule_donation') }}">
+                    <label class="form-label">Donation Date</label>
+                    <input class="form-control mb-3" type="date" name="donation_date" required>
+                    <label class="form-label">Units</label>
+                    <input class="form-control mb-3" type="number" min="1" max="4" name="units" value="1">
+                    <button class="btn btn-outline-danger w-100" type="submit"><i class="fa-solid fa-calendar-check"></i> Schedule</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="panel">
+                <div class="d-flex justify-content-between gap-3 flex-wrap mb-3">
+                    <h2 class="h5 mb-0">Nearby Matching Requests</h2>
+                    <input class="form-control table-search" data-table="requestTable" placeholder="Search requests">
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle" id="requestTable">
+                        <thead><tr><th>Hospital</th><th>Blood</th><th>Units</th><th>Urgency</th><th>City</th><th>Status</th></tr></thead>
+                        <tbody>
+                        {% for req in requests %}
+                            <tr><td>{{ req.hospital_name }}</td><td><span class="blood-badge">{{ req.blood_group }}</span></td><td>{{ req.quantity }}</td><td><span class="priority {{ req.urgency|lower }}">{{ req.urgency }}</span></td><td>{{ req.city }}</td><td>{{ req.request_status }}</td></tr>
+                        {% else %}
+                            <tr><td colspan="6" class="text-muted">No matching open requests yet.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

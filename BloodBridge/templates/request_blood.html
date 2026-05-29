@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="container py-4">
+    <div class="dashboard-heading"><div><h1>Emergency Blood Request</h1><p>Requests notify eligible matching donors in the same city.</p></div></div>
+    <div class="panel mx-auto form-panel">
+        <form method="post">
+            <label class="form-label">Blood Group</label>
+            <select class="form-select mb-3" name="blood_group" required>
+                {% for group in blood_groups %}<option value="{{ group }}">{{ group }}</option>{% endfor %}
+            </select>
+            <label class="form-label">Quantity Required</label>
+            <input class="form-control mb-3" type="number" min="1" name="quantity" value="1" required>
+            <label class="form-label">Urgency</label>
+            <select class="form-select mb-3" name="urgency" required>
+                {% for level in urgency_levels %}<option value="{{ level }}">{{ level }}</option>{% endfor %}
+            </select>
+            <label class="form-label">City</label>
+            <input class="form-control mb-4" name="city" value="{{ hospital.city if hospital else '' }}" required>
+            <button class="btn btn-danger w-100"><i class="fa-solid fa-bell"></i> Create Emergency Request</button>
+        </form>
+    </div>
+</section>
+{% endblock %}
+

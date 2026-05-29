@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <span class="badge text-bg-light text-danger mb-3"><i class="fa-solid fa-heart-pulse"></i> Emergency-ready blood network</span>
+                <h1>BloodBridge: Optimizing Lifesaving Resources using AWS EC2 and RDS</h1>
+                <p class="lead">Connect donors, hospitals, blood banks, and administrators in one real-time blood availability platform.</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg"><i class="fa-solid fa-user-plus"></i> Join Network</a>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="hero-panel">
+                    <h2 class="h5">Live Blood Stock</h2>
+                    {% for item in inventory %}
+                        <div class="stock-row">
+                            <span class="blood-badge">{{ item.blood_group }}</span>
+                            <div class="progress flex-grow-1" role="progressbar">
+                                <div class="progress-bar bg-danger" style="width: {{ [item.units_available * 4, 100]|min }}%"></div>
+                            </div>
+                            <strong>{{ item.units_available }}</strong>
+                        </div>
+                    {% else %}
+                        <p class="mb-0">Inventory appears after loading the sample database.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container py-5">
+    <div class="row g-4">
+        <div class="col-md-3"><div class="feature-card"><i class="fa-solid fa-hand-holding-medical"></i><h3>Donors</h3><p>Manage eligibility, location, donation history, and nearby requests.</p></div></div>
+        <div class="col-md-3"><div class="feature-card"><i class="fa-solid fa-hospital"></i><h3>Hospitals</h3><p>Create urgent requests, track status, and see matching donors.</p></div></div>
+        <div class="col-md-3"><div class="feature-card"><i class="fa-solid fa-warehouse"></i><h3>Blood Banks</h3><p>Update inventory, monitor low stock, and review donation flow.</p></div></div>
+        <div class="col-md-3"><div class="feature-card"><i class="fa-solid fa-chart-line"></i><h3>Admins</h3><p>Watch network health through metrics, tables, and analytics.</p></div></div>
+    </div>
+</section>
+{% endblock %}
+

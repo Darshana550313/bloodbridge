@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="container py-4">
+    <div class="dashboard-heading"><div><h1>Admin Dashboard</h1><p>Monitor donors, hospitals, requests, users, and inventory analytics.</p></div></div>
+    <div class="row g-3 mb-4">
+        <div class="col-md-3"><div class="metric-card"><span>Total Donors</span><strong>{{ metrics.donors }}</strong><i class="fa-solid fa-users"></i></div></div>
+        <div class="col-md-3"><div class="metric-card"><span>Total Hospitals</span><strong>{{ metrics.hospitals }}</strong><i class="fa-solid fa-hospital"></i></div></div>
+        <div class="col-md-3"><div class="metric-card"><span>Blood Requests</span><strong>{{ metrics.requests }}</strong><i class="fa-solid fa-file-medical"></i></div></div>
+        <div class="col-md-3"><div class="metric-card"><span>Open Requests</span><strong>{{ metrics.open_requests }}</strong><i class="fa-solid fa-bell"></i></div></div>
+    </div>
+    <div class="row g-4">
+        <div class="col-lg-5"><div class="panel"><h2 class="h5">Blood Availability Chart</h2><canvas id="inventoryChart" height="180"></canvas></div></div>
+        <div class="col-lg-7">
+            <div class="panel">
+                <div class="d-flex justify-content-between gap-3 flex-wrap mb-3">
+                    <h2 class="h5 mb-0">Emergency Notifications</h2>
+                    <input class="form-control table-search" data-table="adminRequestTable" placeholder="Search requests">
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle" id="adminRequestTable">
+                        <thead><tr><th>Hospital</th><th>Blood</th><th>Units</th><th>Urgency</th><th>Status</th></tr></thead>
+                        <tbody>
+                        {% for req in requests %}
+                            <tr><td>{{ req.hospital_name }}</td><td><span class="blood-badge">{{ req.blood_group }}</span></td><td>{{ req.quantity }}</td><td><span class="priority {{ req.urgency|lower }}">{{ req.urgency }}</span></td><td>{{ req.request_status }}</td></tr>
+                        {% else %}
+                            <tr><td colspan="5" class="text-muted">No requests found.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel mt-4">
+        <div class="d-flex justify-content-between gap-3 flex-wrap mb-3">
+            <h2 class="h5 mb-0">User Management</h2>
+            <input class="form-control table-search" data-table="userTable" placeholder="Search users">
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle" id="userTable">
+                <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Created</th></tr></thead>
+                <tbody>
+                {% for user in users %}
+                    <tr><td>{{ user.name }}</td><td>{{ user.email }}</td><td>{{ user.role }}</td><td>{{ user.created_at }}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}
+{% block scripts_extra %}
+<script>renderInventoryChart("inventoryChart");</script>
+{% endblock %}
+

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="container py-4">
+    <div class="dashboard-heading"><div><h1>Blood Bank Inventory</h1><p>Update stock, review donation history, and watch shortage alerts.</p></div></div>
+    {% if low_stock %}
+        <div class="alert alert-warning"><i class="fa-solid fa-triangle-exclamation"></i> Low stock:
+            {% for item in low_stock %}<strong>{{ item.blood_group }} ({{ item.units_available }})</strong>{% if not loop.last %}, {% endif %}{% endfor %}
+        </div>
+    {% endif %}
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="panel">
+                <h2 class="h5">Update Stock</h2>
+                <form method="post" action="{{ url_for('inventory.update_stock') }}">
+                    <label class="form-label">Blood Group</label>
+                    <select class="form-select mb-3" name="blood_group">
+                        {% for group in blood_groups %}<option value="{{ group }}">{{ group }}</option>{% endfor %}
+                    </select>
+                    <label class="form-label">Units Available</label>
+                    <input class="form-control mb-3" type="number" min="0" name="units_available" required>
+                    <button class="btn btn-danger w-100"><i class="fa-solid fa-boxes-stacked"></i> Update Inventory</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="panel">
+                <h2 class="h5">Real-time Blood Stock</h2>
+                <canvas id="inventoryChart" height="120"></canvas>
+            </div>
+            <div class="panel mt-4">
+                <div class="d-flex justify-content-between gap-3 flex-wrap mb-3">
+                    <h2 class="h5 mb-0">Donation History</h2>
+                    <input class="form-control table-search" data-table="donationTable" placeholder="Search donations">
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle" id="donationTable">
+                        <thead><tr><th>Donor</th><th>Blood</th><th>Units</th><th>Date</th><th>City</th></tr></thead>
+                        <tbody>
+                        {% for donation in donations %}
+                            <tr><td>{{ donation.name }}</td><td><span class="blood-badge">{{ donation.blood_group }}</span></td><td>{{ donation.units }}</td><td>{{ donation.donation_date }}</td><td>{{ donation.city }}</td></tr>
+                        {% else %}
+                            <tr><td colspan="5" class="text-muted">No donation records yet.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+{% block scripts_extra %}
+<script>renderInventoryChart("inventoryChart");</script>
+{% endblock %}
+

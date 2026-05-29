@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="auth-shell">
+    <div class="auth-card auth-card-wide">
+        <h1 class="h3 mb-3">Register</h1>
+        <form method="post">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Name</label>
+                    <input class="form-control" name="name" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <input class="form-control" type="email" name="email" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Password</label>
+                    <input class="form-control" type="password" name="password" minlength="8" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Role</label>
+                    <select class="form-select" name="role" id="roleSelect">
+                        <option value="donor">Donor</option>
+                        <option value="hospital">Hospital</option>
+                        <option value="blood_bank">Blood Bank</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="col-12 hospital-fields d-none">
+                    <div class="row g-3">
+                        <div class="col-md-4"><label class="form-label">Hospital Name</label><input class="form-control" name="hospital_name"></div>
+                        <div class="col-md-4"><label class="form-label">City</label><input class="form-control" name="city"></div>
+                        <div class="col-md-4"><label class="form-label">Contact</label><input class="form-control" name="contact"></div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-danger w-100 mt-4" type="submit"><i class="fa-solid fa-user-plus"></i> Create Account</button>
+        </form>
+    </div>
+</section>
+{% endblock %}
+

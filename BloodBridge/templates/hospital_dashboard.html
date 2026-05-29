@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="container py-4">
+    <div class="dashboard-heading">
+        <div><h1>Hospital Dashboard</h1><p>Create emergency requests and track donor matches.</p></div>
+        <a class="btn btn-danger" href="{{ url_for('hospital.request_blood') }}"><i class="fa-solid fa-truck-medical"></i> Request Blood</a>
+    </div>
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="panel">
+                <h2 class="h5">Hospital Profile</h2>
+                <form method="post" action="{{ url_for('hospital.save_profile') }}">
+                    <label class="form-label">Hospital Name</label>
+                    <input class="form-control mb-3" name="hospital_name" value="{{ hospital.hospital_name if hospital else '' }}" required>
+                    <label class="form-label">City</label>
+                    <input class="form-control mb-3" name="city" value="{{ hospital.city if hospital else '' }}" required>
+                    <label class="form-label">Contact</label>
+                    <input class="form-control mb-3" name="contact" value="{{ hospital.contact if hospital else '' }}" required>
+                    <button class="btn btn-danger w-100"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+                </form>
+            </div>
+            <div class="panel mt-4">
+                <h2 class="h5">Latest Matching Donors</h2>
+                {% for donor in matching_donors %}
+                    <div class="donor-match"><strong>{{ donor.name }}</strong><span>{{ donor.blood_group }} · {{ donor.city }}</span><small>{{ donor.phone }}</small></div>
+                {% else %}
+                    <p class="text-muted mb-0">Create a request to view donor matches.</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="panel">
+                <div class="d-flex justify-content-between gap-3 flex-wrap mb-3">
+                    <h2 class="h5 mb-0">Request Status Tracking</h2>
+                    <input class="form-control table-search" data-table="hospitalRequestTable" placeholder="Search requests">
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle" id="hospitalRequestTable">
+                        <thead><tr><th>Blood</th><th>Units</th><th>Urgency</th><th>City</th><th>Status</th><th>Update</th></tr></thead>
+                        <tbody>
+                        {% for req in requests %}
+                            <tr>
+                                <td><span class="blood-badge">{{ req.blood_group }}</span></td>
+                                <td>{{ req.quantity }}</td>
+                                <td><span class="priority {{ req.urgency|lower }}">{{ req.urgency }}</span></td>
+                                <td>{{ req.city }}</td>
+                                <td>{{ req.request_status }}</td>
+                                <td>
+                                    <form class="d-flex gap-2" method="post" action="{{ url_for('hospital.change_request_status', request_id=req.request_id) }}">
+                                        <select class="form-select form-select-sm" name="request_status">
+                                            {% for status in ['Open', 'In Progress', 'Fulfilled', 'Cancelled'] %}
+                                                <option value="{{ status }}" {% if req.request_status == status %}selected{% endif %}>{{ status }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-check"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="6" class="text-muted">No requests created yet.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
