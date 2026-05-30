@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template
 
-from models.repositories import admin_metrics, get_all_requests, get_all_users, get_inventory
+from models.repositories import admin_metrics, get_all_donation_responses, get_all_requests, get_all_users, get_inventory
 from utils.auth import login_required, role_required
 
 
@@ -16,6 +16,6 @@ def dashboard():
         metrics=admin_metrics(),
         users=get_all_users(),
         requests=get_all_requests(),
+        responses=get_all_donation_responses(),
         inventory=get_inventory(),
     )
-
