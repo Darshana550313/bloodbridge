@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    document.querySelectorAll(".feature-card, .panel, .auth-card, .metric-card").forEach((element) => {
+    document.querySelectorAll(".feature-card, .panel, .auth-card, .metric-card, .dashboard-heading, .alert, tbody tr").forEach((element) => {
         element.classList.add("reveal-on-scroll");
     });
 
@@ -37,6 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".reveal-on-scroll").forEach((element) => revealObserver.observe(element));
 
     initBloodBridgeScene();
+    initAmbientMedicalScene();
 });
 
 function initBloodBridgeScene() {
@@ -168,6 +169,119 @@ function initBloodBridgeScene() {
     animate();
 }
 
+function initAmbientMedicalScene() {
+    const canvas = document.getElementById("ambient3d");
+    if (!canvas || !window.THREE) return;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 100);
+    camera.position.set(0, 0, 9);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 1.4));
+    const light = new THREE.DirectionalLight(0xffffff, 1.8);
+    light.position.set(3, 4, 6);
+    scene.add(light);
+
+    const group = new THREE.Group();
+    scene.add(group);
+
+    const redMaterial = new THREE.MeshStandardMaterial({
+        color: 0xc73a4b,
+        roughness: 0.46,
+        metalness: 0.05,
+        transparent: true,
+        opacity: 0.9
+    });
+    const tealMaterial = new THREE.MeshStandardMaterial({
+        color: 0x0f766e,
+        roughness: 0.36,
+        metalness: 0.12,
+        transparent: true,
+        opacity: 0.74
+    });
+    const coralMaterial = new THREE.MeshStandardMaterial({
+        color: 0xf27f62,
+        roughness: 0.44,
+        metalness: 0.05,
+        transparent: true,
+        opacity: 0.72
+    });
+
+    const torusGeometry = new THREE.TorusGeometry(0.22, 0.07, 16, 36);
+    const sphereGeometry = new THREE.SphereGeometry(0.09, 18, 12);
+    const plusBarGeometry = new THREE.BoxGeometry(0.32, 0.08, 0.08);
+
+    for (let index = 0; index < 34; index += 1) {
+        const object = new THREE.Group();
+        const angle = index * 0.88;
+        const row = index % 6;
+        object.position.set(
+            Math.cos(angle) * (3.2 + row * 0.34),
+            Math.sin(angle * 0.72) * 2.9,
+            -1.8 - (index % 5) * 0.55
+        );
+        object.userData = {
+            baseY: object.position.y,
+            drift: 0.5 + index * 0.04,
+            speed: 0.004 + index * 0.00012
+        };
+
+        if (index % 5 === 0) {
+            const horizontal = new THREE.Mesh(plusBarGeometry, tealMaterial);
+            const vertical = new THREE.Mesh(plusBarGeometry, tealMaterial);
+            vertical.rotation.z = Math.PI / 2;
+            object.add(horizontal, vertical);
+        } else if (index % 3 === 0) {
+            object.add(new THREE.Mesh(sphereGeometry, coralMaterial));
+        } else {
+            object.add(new THREE.Mesh(torusGeometry, redMaterial));
+        }
+
+        object.rotation.set(angle * 0.2, angle * 0.4, angle * 0.1);
+        group.add(object);
+    }
+
+    let scrollProgress = 0;
+    const updateScroll = () => {
+        const maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+        scrollProgress = window.scrollY / maxScroll;
+    };
+
+    const resize = () => {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        renderer.setSize(width, height, false);
+        camera.aspect = width / Math.max(height, 1);
+        camera.updateProjectionMatrix();
+    };
+
+    window.addEventListener("resize", resize);
+    window.addEventListener("scroll", updateScroll, { passive: true });
+    resize();
+    updateScroll();
+
+    const clock = new THREE.Clock();
+    const animate = () => {
+        const elapsed = clock.getElapsedTime();
+        group.rotation.y = elapsed * 0.035 + scrollProgress * 0.8;
+        group.rotation.x = Math.sin(elapsed * 0.28) * 0.07;
+
+        group.children.forEach((object) => {
+            object.rotation.x += object.userData.speed;
+            object.rotation.y += object.userData.speed * 1.45;
+            object.position.y = object.userData.baseY + Math.sin(elapsed * object.userData.drift) * 0.12;
+        });
+
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+    };
+
+    animate();
+}
+
 async function renderInventoryChart(canvasId) {
     const canvas = document.getElementById(canvasId);
     if (!canvas || !window.Chart) return;
@@ -182,7 +296,7 @@ async function renderInventoryChart(canvasId) {
             datasets: [{
                 label: "Units Available",
                 data: data.units,
-                backgroundColor: ["#d71920", "#ef5350", "#ff8a80", "#b71c1c", "#f44336", "#c62828", "#e57373", "#ff5252"],
+                backgroundColor: ["#0f766e", "#c73a4b", "#f27f62", "#932637", "#5fb7a8", "#df6372", "#f6a78f", "#284553"],
                 borderRadius: 6
             }]
         },
