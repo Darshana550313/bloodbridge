@@ -42,12 +42,53 @@
                 </div>
                 <div class="table-responsive">
                     <table class="table align-middle" id="requestTable">
-                        <thead><tr><th>Hospital</th><th>Blood</th><th>Units</th><th>Urgency</th><th>City</th><th>Status</th></tr></thead>
+                        <thead><tr><th>Hospital</th><th>Blood</th><th>Units</th><th>Urgency</th><th>City</th><th>Status</th><th>Action</th></tr></thead>
                         <tbody>
                         {% for req in requests %}
-                            <tr><td>{{ req.hospital_name }}</td><td><span class="blood-badge">{{ req.blood_group }}</span></td><td>{{ req.quantity }}</td><td><span class="priority {{ req.urgency|lower }}">{{ req.urgency }}</span></td><td>{{ req.city }}</td><td>{{ req.request_status }}</td></tr>
+                            <tr>
+                                <td>{{ req.hospital_name }}</td>
+                                <td><span class="blood-badge">{{ req.blood_group }}</span></td>
+                                <td>{{ req.quantity }}</td>
+                                <td><span class="priority {{ req.urgency|lower }}">{{ req.urgency }}</span></td>
+                                <td>{{ req.city }}</td>
+                                <td>{{ req.request_status }}</td>
+                                <td>
+                                    {% if req.response_status %}
+                                        <span class="response-pill {{ req.response_status|lower }}">{{ req.response_status }}</span>
+                                    {% else %}
+                                        <form class="response-form" method="post" action="{{ url_for('donor.respond_to_request', request_id=req.request_id) }}">
+                                            <input class="form-control form-control-sm" type="date" name="preferred_date" required>
+                                            <input class="form-control form-control-sm" type="number" min="1" max="4" name="units" value="1" aria-label="Units">
+                                            <input class="form-control form-control-sm" name="message" maxlength="255" placeholder="Short note">
+                                            <button class="btn btn-sm btn-danger" type="submit"><i class="fa-solid fa-hand-holding-droplet"></i> I Can Donate</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
                         {% else %}
-                            <tr><td colspan="6" class="text-muted">No matching open requests yet.</td></tr>
+                            <tr><td colspan="7" class="text-muted">No matching open requests yet.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="panel mt-4">
+                <h2 class="h5">My Donation Responses</h2>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead><tr><th>Hospital</th><th>Blood</th><th>Units</th><th>Date</th><th>Status</th><th>Request</th></tr></thead>
+                        <tbody>
+                        {% for response in responses %}
+                            <tr>
+                                <td>{{ response.hospital_name }}</td>
+                                <td><span class="blood-badge">{{ response.blood_group }}</span></td>
+                                <td>{{ response.units }}</td>
+                                <td>{{ response.preferred_date }}</td>
+                                <td><span class="response-pill {{ response.response_status|lower }}">{{ response.response_status }}</span></td>
+                                <td>{{ response.request_status }}</td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="6" class="text-muted">You have not responded to any request yet.</td></tr>
                         {% endfor %}
                         </tbody>
                     </table>
@@ -57,4 +98,3 @@
     </div>
 </section>
 {% endblock %}
-
