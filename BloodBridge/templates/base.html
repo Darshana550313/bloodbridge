@@ -30,6 +30,28 @@
                     {% elif session.get('role') == 'admin' %}
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.dashboard') }}">Admin</a></li>
                     {% endif %}
+                    <li class="nav-item dropdown">
+                        <button class="btn btn-outline-danger btn-sm notification-toggle" data-bs-toggle="dropdown" type="button">
+                            <i class="fa-solid fa-bell"></i>
+                            {% if unread_notifications %}<span class="notification-count">{{ unread_notifications }}</span>{% endif %}
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end notification-menu">
+                            <div class="notification-menu-head">
+                                <strong>Notifications</strong>
+                                <form method="post" action="{{ url_for('main.read_notifications') }}">
+                                    <button class="btn btn-link btn-sm p-0" type="submit">Mark read</button>
+                                </form>
+                            </div>
+                            {% for note in nav_notifications %}
+                                <a class="dropdown-item notification-item {% if not note.is_read %}unread{% endif %}" href="{{ note.link or '#' }}">
+                                    <strong>{{ note.title }}</strong>
+                                    <span>{{ note.message }}</span>
+                                </a>
+                            {% else %}
+                                <span class="dropdown-item-text text-muted small">No notifications yet.</span>
+                            {% endfor %}
+                        </div>
+                    </li>
                     <li class="nav-item"><a class="btn btn-outline-danger btn-sm" href="{{ url_for('auth.logout') }}">Logout</a></li>
                 {% else %}
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Login</a></li>
