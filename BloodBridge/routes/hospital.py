@@ -1,10 +1,18 @@
+from datetime import date
+
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 
 from models.repositories import (
+    add_inventory_units,
     create_blood_request,
+    create_donation,
+    create_notification,
     find_matching_donors,
+    get_donation_response_for_hospital,
+    get_donation_responses_for_hospital,
     get_hospital_by_user,
     get_requests_for_hospital,
+    update_donation_response_status,
     update_request_status,
     upsert_hospital_for_user,
 )
@@ -22,6 +30,7 @@ hospital_bp = Blueprint("hospital", __name__, url_prefix="/hospital")
 def dashboard():
     hospital = get_hospital_by_user(session["user_id"])
     requests = get_requests_for_hospital(hospital["hospital_id"]) if hospital else []
+    donation_responses = get_donation_responses_for_hospital(hospital["hospital_id"]) if hospital else []
     matching_donors = []
     if requests:
         newest = requests[0]
@@ -30,6 +39,7 @@ def dashboard():
         "hospital_dashboard.html",
         hospital=hospital,
         requests=requests,
+        donation_responses=donation_responses,
         matching_donors=matching_donors,
         blood_groups=BLOOD_GROUPS,
         urgency_levels=URGENCY_LEVELS,
@@ -77,6 +87,12 @@ def request_blood():
         request_id = create_blood_request(hospital["hospital_id"], blood_group, quantity, urgency, city)
         donors = find_matching_donors(blood_group, city)
         for donor in donors[:5]:
+            create_notification(
+                donor["user_id"],
+                "Emergency blood request nearby",
+                f"{hospital['hospital_name']} needs {quantity} unit(s) of {blood_group} blood in {city}.",
+                url_for("donor.dashboard"),
+            )
             send_email_notification(
                 donor["email"],
                 "Emergency blood request nearby",
@@ -102,4 +118,41 @@ def change_request_status(request_id):
 
     update_request_status(request_id, hospital["hospital_id"], status)
     flash("Request status updated.", "success")
+    return redirect(url_for("hospital.dashboard"))
+
+
+@hospital_bp.route("/response/<int:response_id>/status", methods=["POST"])
+@login_required
+@role_required("hospital")
+def change_response_status(response_id):
+    hospital = get_hospital_by_user(session["user_id"])
+    status = request.form.get("response_status")
+    if status not in ("Pending", "Accepted", "Contacted", "Scheduled", "Completed", "Rejected"):
+        flash("Invalid donor response status.", "danger")
+        return redirect(url_for("hospital.dashboard"))
+
+    response = get_donation_response_for_hospital(response_id, hospital["hospital_id"])
+    if not response:
+        flash("Donation response not found.", "danger")
+        return redirect(url_for("hospital.dashboard"))
+
+    previous_status = response["response_status"]
+    update_donation_response_status(response_id, hospital["hospital_id"], status)
+
+    if status in ("Accepted", "Contacted", "Scheduled"):
+        update_request_status(response["request_id"], hospital["hospital_id"], "In Progress")
+    elif status == "Completed":
+        update_request_status(response["request_id"], hospital["hospital_id"], "Fulfilled")
+        if previous_status != "Completed":
+            create_donation(response["donor_id"], date.today(), response["blood_group"], response["units"])
+            add_inventory_units(response["blood_group"], response["units"])
+
+    create_notification(
+        response["donor_user_id"],
+        f"Donation response {status.lower()}",
+        f"{hospital['hospital_name']} marked your {response['blood_group']} donation response as {status}.",
+        url_for("donor.dashboard"),
+    )
+
+    flash(f"Donor response marked as {status}.", "success")
     return redirect(url_for("hospital.dashboard"))
