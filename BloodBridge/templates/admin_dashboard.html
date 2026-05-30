@@ -6,7 +6,7 @@
         <div class="col-md-3"><div class="metric-card"><span>Total Donors</span><strong>{{ metrics.donors }}</strong><i class="fa-solid fa-users"></i></div></div>
         <div class="col-md-3"><div class="metric-card"><span>Total Hospitals</span><strong>{{ metrics.hospitals }}</strong><i class="fa-solid fa-hospital"></i></div></div>
         <div class="col-md-3"><div class="metric-card"><span>Blood Requests</span><strong>{{ metrics.requests }}</strong><i class="fa-solid fa-file-medical"></i></div></div>
-        <div class="col-md-3"><div class="metric-card"><span>Open Requests</span><strong>{{ metrics.open_requests }}</strong><i class="fa-solid fa-bell"></i></div></div>
+        <div class="col-md-3"><div class="metric-card"><span>Donor Responses</span><strong>{{ metrics.responses }}</strong><i class="fa-solid fa-hand-holding-droplet"></i></div></div>
     </div>
     <div class="row g-4">
         <div class="col-lg-5"><div class="panel"><h2 class="h5">Blood Availability Chart</h2><canvas id="inventoryChart" height="180"></canvas></div></div>
@@ -33,6 +33,31 @@
     </div>
     <div class="panel mt-4">
         <div class="d-flex justify-content-between gap-3 flex-wrap mb-3">
+            <h2 class="h5 mb-0">Donor Response Activity</h2>
+            <input class="form-control table-search" data-table="adminResponseTable" placeholder="Search responses">
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle" id="adminResponseTable">
+                <thead><tr><th>Donor</th><th>Hospital</th><th>Blood</th><th>Units</th><th>Urgency</th><th>Status</th></tr></thead>
+                <tbody>
+                {% for response in responses %}
+                    <tr>
+                        <td>{{ response.donor_name }}</td>
+                        <td>{{ response.hospital_name }}</td>
+                        <td><span class="blood-badge">{{ response.blood_group }}</span></td>
+                        <td>{{ response.units }}</td>
+                        <td><span class="priority {{ response.urgency|lower }}">{{ response.urgency }}</span></td>
+                        <td><span class="response-pill {{ response.response_status|lower }}">{{ response.response_status }}</span></td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="6" class="text-muted">No donor responses yet.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="panel mt-4">
+        <div class="d-flex justify-content-between gap-3 flex-wrap mb-3">
             <h2 class="h5 mb-0">User Management</h2>
             <input class="form-control table-search" data-table="userTable" placeholder="Search users">
         </div>
@@ -52,4 +77,3 @@
 {% block scripts_extra %}
 <script>renderInventoryChart("inventoryChart");</script>
 {% endblock %}
-
