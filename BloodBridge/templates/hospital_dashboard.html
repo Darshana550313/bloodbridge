@@ -63,8 +63,46 @@
                     </table>
                 </div>
             </div>
+            <div class="panel mt-4">
+                <div class="d-flex justify-content-between gap-3 flex-wrap mb-3">
+                    <h2 class="h5 mb-0">Donor Responses</h2>
+                    <input class="form-control table-search" data-table="donorResponseTable" placeholder="Search responses">
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle" id="donorResponseTable">
+                        <thead><tr><th>Donor</th><th>Blood</th><th>Units</th><th>Date</th><th>Contact</th><th>Status</th><th>Update</th></tr></thead>
+                        <tbody>
+                        {% for response in donation_responses %}
+                            <tr>
+                                <td>
+                                    <strong>{{ response.donor_name }}</strong>
+                                    <small class="d-block text-muted">{{ response.donor_email }}</small>
+                                    {% if response.message %}<small class="d-block">{{ response.message }}</small>{% endif %}
+                                </td>
+                                <td><span class="blood-badge">{{ response.blood_group }}</span></td>
+                                <td>{{ response.units }}</td>
+                                <td>{{ response.preferred_date }}</td>
+                                <td>{{ response.phone }}</td>
+                                <td><span class="response-pill {{ response.response_status|lower }}">{{ response.response_status }}</span></td>
+                                <td>
+                                    <form class="d-flex gap-2" method="post" action="{{ url_for('hospital.change_response_status', response_id=response.response_id) }}">
+                                        <select class="form-select form-select-sm" name="response_status">
+                                            {% for status in ['Pending', 'Accepted', 'Contacted', 'Scheduled', 'Completed', 'Rejected'] %}
+                                                <option value="{{ status }}" {% if response.response_status == status %}selected{% endif %}>{{ status }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-check"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="7" class="text-muted">No donor responses yet.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 {% endblock %}
-
