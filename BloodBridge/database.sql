@@ -1,6 +1,8 @@
 CREATE DATABASE IF NOT EXISTS bloodbridge CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE bloodbridge;
 
+DROP TABLE IF EXISTS notifications;
+DROP TABLE IF EXISTS donation_responses;
 DROP TABLE IF EXISTS donations;
 DROP TABLE IF EXISTS blood_requests;
 DROP TABLE IF EXISTS blood_inventory;
@@ -65,9 +67,37 @@ CREATE TABLE donations (
     CONSTRAINT fk_donations_donor FOREIGN KEY (donor_id) REFERENCES donors(donor_id) ON DELETE CASCADE
 );
 
+CREATE TABLE donation_responses (
+    response_id INT AUTO_INCREMENT PRIMARY KEY,
+    request_id INT NOT NULL,
+    donor_id INT NOT NULL,
+    message VARCHAR(255) NULL,
+    preferred_date DATE NULL,
+    units INT NOT NULL DEFAULT 1 CHECK (units > 0),
+    response_status ENUM('Pending', 'Accepted', 'Contacted', 'Scheduled', 'Completed', 'Rejected') NOT NULL DEFAULT 'Pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_response_request_donor (request_id, donor_id),
+    CONSTRAINT fk_responses_request FOREIGN KEY (request_id) REFERENCES blood_requests(request_id) ON DELETE CASCADE,
+    CONSTRAINT fk_responses_donor FOREIGN KEY (donor_id) REFERENCES donors(donor_id) ON DELETE CASCADE
+);
+
+CREATE TABLE notifications (
+    notification_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    title VARCHAR(140) NOT NULL,
+    message VARCHAR(255) NOT NULL,
+    link VARCHAR(255) NULL,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_notifications_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 CREATE INDEX idx_donors_blood_city ON donors (blood_group, city);
 CREATE INDEX idx_requests_blood_city_status ON blood_requests (blood_group, city, request_status);
 CREATE INDEX idx_inventory_group ON blood_inventory (blood_group);
+CREATE INDEX idx_responses_status ON donation_responses (response_status, created_at);
+CREATE INDEX idx_notifications_user_read ON notifications (user_id, is_read, created_at);
 
 INSERT INTO users (id, name, email, password, role) VALUES
 (1, 'Admin User', 'admin@bloodbridge.local', 'scrypt:32768:8:1$TGDweyz08B60G0NX$d56773ca173c339f44960274e5435b581e0e8be5861e1c65675ea76d11fb0f22e7303f5e8b047cc9435916a3b98481cbe6f6cf5be32e68848bc649f2454b2715', 'admin'),
@@ -90,4 +120,3 @@ INSERT INTO blood_requests (hospital_id, blood_group, quantity, urgency, city, r
 
 INSERT INTO donations (donor_id, donation_date, blood_group, units) VALUES
 (1, '2026-01-10', 'O+', 1);
-
