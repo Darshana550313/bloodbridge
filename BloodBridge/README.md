@@ -33,42 +33,6 @@ BloodBridge/
 └── templates/
 ```
 
-## Local Setup
-
-1. Create and activate a virtual environment.
-
-```bash
-python -m venv .venv
-.venv\Scripts\activate
-```
-
-2. Install dependencies.
-
-```bash
-pip install -r requirements.txt
-```
-
-3. Create the MySQL database and seed data.
-
-```bash
-mysql -u root -p < database.sql
-```
-
-4. Copy `.env.example` to `.env` and update credentials.
-
-```bash
-copy .env.example .env
-```
-
-5. Run the Flask app.
-
-```bash
-set FLASK_APP=app.py
-flask run
-```
-
-Open `http://127.0.0.1:5000`.
-
 ## Sample Accounts
 
 All sample passwords are included for testing only. Change them before deployment.
@@ -87,23 +51,5 @@ All sample passwords are included for testing only. Change them before deploymen
 
 The app mostly uses server-rendered HTML forms because it is beginner-friendly and easy to deploy on EC2. The JSON endpoints power charts and can be extended for a mobile app or SPA.
 
-## GitHub Setup
 
-```bash
-git init
-git add .
-git commit -m "Build BloodBridge Flask AWS RDS project"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/BloodBridge.git
-git push -u origin main
-```
-
-## Production Notes
-
-- Set a strong `SECRET_KEY`.
-- Never commit `.env`.
-- Use AWS RDS private networking where possible.
-- Restrict RDS inbound access to the EC2 security group.
-- Run Flask through Gunicorn behind Nginx or an AWS load balancer.
-- Replace the notification utility with AWS SES for email and AWS SNS for SMS.
 
