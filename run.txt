@@ -1,0 +1,53 @@
+# BloodBridge Run Commands
+
+## 1. EC2 SSH Connect
+
+Windows PowerShell:
+
+```powershell id="6x7n2p"
+ssh -i bloodbridge-key.pem ubuntu@16.171.162.222
+```
+
+---
+
+# 2. Open Project Folder
+
+```bash id="r5m8v1"
+cd ~/bloodbridge/BloodBridge
+```
+
+---
+
+# 3. Activate Virtual Environment
+
+```bash id="n4q2k7"
+source .venv/bin/activate
+```
+
+---
+
+# 4. Run Flask App
+
+```bash id="y9c3t6"
+flask run --host=0.0.0.0 --port=5000
+```
+
+---
+
+# 5. Open Website
+
+Browser:
+
+```text id="h8v1r4"
+http://16.171.162.222:5000
+```
+
+---
+
+# 6. Stop Application
+
+Terminal मध्ये:
+
+```text id="v7w2m9"
+CTRL + C
+```
